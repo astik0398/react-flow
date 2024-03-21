@@ -38,16 +38,28 @@ const OverviewFlow = () => {
   const [isSelected, setIsSelected] = useState(false);
   const [jsonData, setJsonData] = useState(null);
   const [flag, setFlag] = useState(false)
-
+  const [start, setStart] = useState(false)
   const [timer, setTimer] = useState(60)
 
   const onInit = (reactFlowInstance) => setReactFlowInstance(reactFlowInstance);
 
+  // useEffect(()=> {
+
+  //   let interval
+
+  //   if(start){
+  //      interval = setInterval(()=> {
+  //       setTimer(prev=> prev-1)
+  //     }, 1000)
+  //   }
+
+  //     return ()=> clearInterval(interval)
+
+  //   }, [start, timer])
+
   const handleFileChange = (event) => {
 
-    setInterval(()=> {
-      setTimer(prev=> prev-1)
-    }, 1000)
+    setStart(true)
 
     setTimeout(()=> {
 
@@ -117,20 +129,35 @@ const OverviewFlow = () => {
       setNodes((es) => es.concat(newNode));
       setSelectedNode(newNode.id);
     }
-    else if(label == 'wait'){
-      
-        const newNode = {
-          id: getId(),
-          type,
-          position,
-          data: { heading: "Wait For 60 sec", content: timer}
-        };
-      
-        console.log(newNode);
-        setNodes((es) => es.concat(newNode));
-        setSelectedNode(newNode.id);
-      
+    else if (label == 'wait') {
+      const newNode = {
+        id: getId(),
+        type,
+        position,
+        data: { heading: "Wait For 60 sec", content: timer }
+      };
+    
+      console.log(newNode);
+      setNodes((es) => es.concat(newNode));
+      setSelectedNode(newNode.id);
+    
+      // Update node content dynamically
+      const nodeIndex = nodes.findIndex(node => node.id === newNode.id);
+      const updateNodeContent = (newContent) => {
+        setNodes(nodes => nodes.map((node, index) => index === nodeIndex ? { ...node, data: { ...node.data, content: newContent } } : node));
+      };
+    
+      const interval = setInterval(() => {
+        if (timer > 0) {
+          setTimer(prev => prev - 1);
+          updateNodeContent(timer - 1);
+        } else {
+          clearInterval(interval);
+        }
+      }, 1000);
     }
+    
+    
     else if(label == 'convert'){
 
       const newNode = {
